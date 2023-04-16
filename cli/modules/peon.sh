@@ -89,10 +89,9 @@ peon_stop_containers() {
 
 peon_update_containers() {
     draw_menu_header $menu_size "$app_name" "P E O N   U P D A T E"
-    echo -e "[${BLUE}Pulling${STD}] latest version of docker-compose. TODO"
-    # curl https://gitcdn.link/cdn/the-peon-project/peon/main/docker-compose.yml > docker-compose.yml
-    echo -e "[${GREEN}Deploying${STD}] latest peon containers"
+    echo -e "[${BLUE}Pulling${STD}] pull latest PEON containers"
     docker-compose pull
+    echo -e "[${GREEN}Deploying${STD}] deploy the updated containers"
     docker-compose up -d
     sleep 1 # To allow reading of process
 }
@@ -103,7 +102,6 @@ peon_redploy_containers() {
     docker-compose stop
     docker-compose down --remove-orphans --volumes
     echo -e "[${BLUE}Pulling${STD}] latest version of docker-compose. TODO"
-    # curl https://gitcdn.link/cdn/the-peon-project/peon/main/docker-compose.yml > docker-compose.yml
     echo -e "[${GREEN}Deploying${STD}] latest peon containers"
     docker-compose up -d
     sleep 1 # To allow reading of process

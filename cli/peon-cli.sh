@@ -1,7 +1,7 @@
 #!/bin/bash
-source cli/shared.sh
-source cli/peon.sh
-source cli/game.sh
+source modules/shared.sh
+source modules/peon.sh
+source modules/game.sh
 
 help_information() {
     printf " Supported flags are:\n"
