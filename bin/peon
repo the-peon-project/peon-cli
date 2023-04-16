@@ -1,7 +1,7 @@
 #!/bin/bash
-source modules/shared.sh
-source modules/peon.sh
-source modules/game.sh
+source /app/bin/modules/shared.sh
+source /app/bin/modules/peon.sh
+source /app/bin/modules/game.sh
 
 help_information() {
     printf " Supported flags are:\n"
@@ -43,7 +43,6 @@ menu_main_read_options() {
 
 trap 'exit 0' SIGINT SIGQUIT SIGTSTP
 while true; do
-
     if [ -z "$1" ]; then
         menu_main
         menu_main_read_options
