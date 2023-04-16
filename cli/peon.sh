@@ -3,12 +3,9 @@
 peon_check_orc() {
     # Checks of the orc container has been authorised to communicate to docker host
     if [[ $(docker ps | grep 'peon.orc') ]]; then
-        hostname=$(docker container inspect -f '{{.Config.Hostname}}' peon.orc)
-        if [[ $(grep $hostname ~/.ssh/authorized_keys) ]]; then
-            echo " [${BLUE}authorised${STD}]"
-        else
-            echo " [${ORANGE}not authorised${STD}] * Please re-authorise the container."
-        fi
+        docker exec peon.orc ls /var/run/docker.sock >/dev/null 2>&1 \
+            && echo " [${BLUE}authorised${STD}]" \
+            || echo " [${ORANGE}not authorised${STD}] *Please ensure that the docker services on the host are correctly mapped to the orc."
     fi
 }
 
@@ -95,9 +92,8 @@ peon_update_containers() {
     echo -e "[${BLUE}Pulling${STD}] latest version of docker-compose. TODO"
     # curl https://gitcdn.link/cdn/the-peon-project/peon/main/docker-compose.yml > docker-compose.yml
     echo -e "[${GREEN}Deploying${STD}] latest peon containers"
+    docker-compose pull
     docker-compose up -d
-    echo -e "[${BLUE}Authorizing${STD}] orchestrator for node control"
-    cli/configure_orc.sh
     sleep 1 # To allow reading of process
 }
 
@@ -110,8 +106,6 @@ peon_redploy_containers() {
     # curl https://gitcdn.link/cdn/the-peon-project/peon/main/docker-compose.yml > docker-compose.yml
     echo -e "[${GREEN}Deploying${STD}] latest peon containers"
     docker-compose up -d
-    echo -e "[${BLUE}Authorizing${STD}] orchestrator for node control"
-    cli/configure_orc.sh
     sleep 1 # To allow reading of process
 }
 
@@ -127,8 +121,7 @@ menu_peon() {
         printf " 4. Stop Containers\n"
         printf " 5. Update Containers\n"
         printf " 6. Redeploy containers\n"
-        printf " 7. Reauthorize Orchestrator\n"
-        printf " 8. Performance Metrics\n"
+        printf " 7. Performance Metrics\n"
         printf " 0. Main Menu\n\n"
         read -p "Enter selection: " -t 5 choice
         case $choice in
@@ -140,8 +133,7 @@ menu_peon() {
         4) peon_stop_containers ;;
         5) peon_update_containers ;;
         6) peon_redploy_containers ;;
-        7) cli/configure_orc.sh ;;
-        8) peon_get_metrics ;;
+        7) peon_get_metrics ;;
         *) printf "\n ${RED_HL}*Invalid Option*${STD}\n" && sleep 0.75 ;;
         esac
     done
