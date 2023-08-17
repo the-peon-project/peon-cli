@@ -42,6 +42,15 @@ menu_main_read_options() {
 }
 
 trap 'exit 0' SIGINT SIGQUIT SIGTSTP
+script_dir=$(dirname "$0")
+file_path="$script_dir/config/peon_dir"
+if [ ! -e "$file_path" ]; then
+    echo "PEON-CLI is not configured."
+    read -p "Please provide the full path of the peon installation: " rootpath
+    echo $rootpath > "$script_dir/config/peon_dir"
+fi
+rootpath=$(cat "$script_dir/config/peon_dir")
+
 while true; do
     if [ -z "$1" ]; then
         menu_main
