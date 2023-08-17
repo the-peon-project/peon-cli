@@ -108,6 +108,7 @@ peon_redploy_containers() {
 }
 
 menu_peon() {
+    cd $rootpath
     local incomplete=true
     local choice
     while $incomplete; do
