@@ -47,32 +47,9 @@ game_delete_container() {
     sleep 0.75
 }
 
-game_container_logs() {
+container_logs() {
     docker logs "$1"
     pause
-}
-
-game_server_logs() {
-    docker_go_data=($(docker inspect -f '{{.Mounts}}' $1))
-    for chunk in "${docker_go_data[@]}"; do
-        if [[ $chunk == *"/root/peon/servers"*"/logs"* ]]; then log_path="$chunk"; fi
-    done
-    log_files=($(ls $log_path))
-    printf "\n━ Game Server Logs ━\n${BLUE}$log_path${STD}\n"
-    select log in $(ls $log_path); do
-        case $REPLY in
-        [1-${#log_files[@]}])
-            clear
-            more "$log_path/$log"
-            read -n 1 -s result
-            break
-            ;;
-        0)
-            break
-            ;;
-        *) printf "\n ${RED_HL}*Invalid Option*${STD}\n" && sleep 0.75 ;;
-        esac
-    done
 }
 
 game_action() {
@@ -98,8 +75,7 @@ game_action() {
         printf " 3. Restart Container\n"
         printf " 4. Stop Container\n"
         printf " 5. Run command\n"
-        printf " 6. Container logs\n"
-        printf " 7. Server logs\n"
+        printf " 6. Logs\n"
         printf " 8. Server Metrics\n"
         printf " 9. Delete Container\n"
         printf " 0. Back\n\n"
@@ -112,10 +88,9 @@ game_action() {
         3) game_restart_container $container ;;
         4) game_stop_container $container ;;
         5) run_command_as_root $container ;;
-        6) game_container_logs $container ;;
-        7) game_server_logs $container ;;
-        8) game_get_metrics $container ;;
-        9) game_delete_container $container; break ;;
+        6) container_logs $container ;;
+        7) game_get_metrics $container ;;
+        8) game_delete_container $container; break ;;
         *) printf "\n ${RED_HL}*Invalid Option*${STD}\n" && sleep 0.75 ;;
         esac
     done
