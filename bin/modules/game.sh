@@ -17,32 +17,35 @@ game_connect_container() {
 
 game_start_container() {
     echo -e "[${GREEN}Starting${STD}] $1"
-    docker start $1
+    docker-compose up -d
     sleep 0.75
+    pause
 }
 
 game_restart_container() {
     echo -e "[${RED}Stopping${STD}] $1"
-    docker stop $1
+    docker-compose stop
     echo -e "[${GREEN}Starting${STD}] $1"
-    docker start $1
+    docker-compose up -d
     sleep 0.75
 }
 
 game_stop_container() {
     echo -e "[${RED}Stopping${STD}] $1"
-    docker stop $1
+    docker-compose stop
     sleep 0.75
 }
 
 game_delete_container() {
-    echo -e "[${RED_HL}Deleting${STD}] $1"
-    docker stop $1
-    docker rm $1
-    read -p "Delete all persistent server content & config files? y/[n] " -t 5 choice
+    read -p "Are you sure you want to delete the game server? y/[n] " -t 5 choice
     if [[ "${choice,,}" == "y" ]]; then 
-        echo "Files are being removed."
-        rm -rf $(echo "/root/peon/servers/$1" | sed "s/peon.warcamp.//g" | sed "s/\./\//g")
+        echo -e "[${RED_HL}Deleting${STD}] $1"
+        docker-compose down
+        read -p "Delete all persistent server content & config files? y/[n] " -t 5 choice
+        if [[ "${choice,,}" == "y" ]]; then 
+            echo "Files are being removed."
+            rm -rf $2
+        fi
     fi
     sleep 0.75
 }
@@ -74,22 +77,22 @@ game_action() {
         printf " 2. Start Container\n"
         printf " 3. Restart Container\n"
         printf " 4. Stop Container\n"
-        printf " 5. Run command\n"
-        printf " 6. Logs\n"
-        printf " 8. Server Metrics\n"
-        printf " 9. Delete Container\n"
+        printf " 5. Logs\n"
+        printf " 6. Server Metrics\n"
+        printf " 8. Delete Container\n"
         printf " 0. Back\n\n"
         read -p "Enter selection: " -t 5 choice
+        server_path=$(echo "$rootpath/servers/$container" | sed "s/peon.warcamp.//g" | sed "s/\./\//g")
+        cd $server_path
         case $choice in
         "") pass ;;
         0) action_incomplete=false ;;
-        1) game_connect_container $container ;;
-        2) game_start_container $container ;;
-        3) game_restart_container $container ;;
-        4) game_stop_container $container ;;
-        5) run_command_as_root $container ;;
-        6) container_logs $container ;;
-        7) game_get_metrics $container ;;
+        1) game_connect_container $container;;
+        2) game_start_container $container;;
+        3) game_restart_container $container;;
+        4) game_stop_container $container;;
+        5) container_logs $container;;
+        6) game_get_metrics $container;;
         8) game_delete_container $container; break ;;
         *) printf "\n ${RED_HL}*Invalid Option*${STD}\n" && sleep 0.75 ;;
         esac
@@ -102,7 +105,7 @@ menu_game() {
     while $game_incomplete; do
         draw_menu_header $menu_size "$app_name" "G A M E   C O N T A I N E R S"
         PS3="Enter selection: "
-        container_list=$(docker ps -a --format "{{.Names}}" | grep -i 'peon.warcamp')
+        container_list=$(docker ps -a --format "{{.Names}}" | grep -i 'peon.warcamp' | sort)
         container_count=$(echo $container_list | wc -w)
         if [ "$container_count" -gt "0" ]; then
             select container in $container_list; do
