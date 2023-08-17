@@ -53,7 +53,8 @@ list_all_containers() {
     result=""
     while [ "$result" == "" ]; do
         draw_menu_header $menu_size "$app_name" "A L L   C O N T A I N E R S"
-        docker ps -a --format "table {{.Names}}\t{{.State}}"
+        docker ps -a --format "{{.Names}}\t{{.State}}" | sort | awk -F '\t' '{if ($2 == "exited") {$2 = "\033[31mexited\033[0m"} else if ($2 == "running") {$2 = "\033[32mrunning\033[0m"}; print $1 "\t" $2}' | column -t -s $'\t'
+
         read -n 1 -s -t 5 result
     done
 }
