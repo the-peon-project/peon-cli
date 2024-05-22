@@ -1,7 +1,11 @@
 #!/bin/bash
-source /app/bin/modules/shared.sh
-source /app/bin/modules/peon.sh
-source /app/bin/modules/game.sh
+
+# Get the path of this script
+script_dir=$(dirname "$0")
+
+source $script_dir/modules/shared.sh
+source $script_dir/modules/peon.sh
+source $script_dir/modules/game.sh
 
 help_information() {
     printf " Supported flags are:\n"
